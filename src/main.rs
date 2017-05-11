@@ -1,10 +1,20 @@
 extern crate hyper;
 use std::io::Read;
 use hyper::Client;
+use hyper::Url;
 
 fn main() {
     // GET
-    fn get_contents(url: &str) -> hyper::Result<String> {
+
+    fn check_url(url: &str) -> Result<hyper::Url, &'static str> {
+        let url = match Url::parse(url) {
+            Ok(url) => url,
+            Err(_) => panic!("Uh oh. Wrong url"),
+        };
+        Ok(url)
+    }
+
+    fn get_contents(url: hyper::Url) -> hyper::Result<String> {
         //Impl:type Result<T> = Result<T, Error>; Result type which can return hyper errors
         let client = Client::new(); //creates a new client request
         let mut response = client.get(url).send()?; //send completes writing request and returns Response
@@ -14,7 +24,8 @@ fn main() {
         Ok(buf)
     }
 
-    println!("{}",
-             get_contents("http://www.tutorialspoint.com/http/http_requests").unwrap()); // A whole mess of HTML
+    let url = check_url("://www.tutorialspoint.com/http/http_requests");
+    println!("{}", get_contents(url.unwrap()).unwrap());
+    //println!("{:?}",get_contents("http://www.tutorialspoint.com/http/http_requests"));
 
 }
